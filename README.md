@@ -15,33 +15,39 @@
 - (Write out what challenges you expect to encounter, or ideas you want to come up with)
 
 ## Phases of Completion
-### Phase
+### Phase -3
 1. Users can register
 2. Users can log in
 3. Users can log out
-4. Users can increment a count from the front end
-5. That count can be saved to that user's data in the database
-6. Users can continue counting where they left off
+4. The backend api can receive requests and respond to them appropriately
+5. Users can increment a count from the front end
+6. That count can be saved to that user's data in the database
+7. Users can continue counting where they left off
 
-### Phase
+### Phase -2
 1. Regions exist
 2. Regions can be occupied by users
 3. Users can select a region
-4. A resources table
-4. Users can increment a count based on the region they're in
-5. A region's resource count can deplete
-6. The database records these changes in a timely manner
+4. A resources table exist
+5. Users can increment a count based on the region they're in
+6. A region's resource count can deplete
+7. The database records these changes in a timely manner
 
-### Phase
+### Phase -1
 1. User counts can decrement.
 2. Users can purchase upgrades that let them increment the number automatically
 3. That count will continue going up wether the user is logged in or not
-4. Users can send messages to each other
-5. The GUI is positioned properly
+4. Messages table exists
+5. Users can send messages to each other
+6. The GUI is positioned properly
 
-### Phase
+### Phase 0
 1. Users can delete messages in thier inbox
 2. Users can make trade requests
+3. Users can complete trade requests
+4. The GUI isn't completely ugly
+
+
 - (The steps or phases you expect to go through, and the tasks that you'll need to accomplish to reach each step. These should resemble the acceptance criteria we were working through earlier.)
 
 ## Technologies
