@@ -8,7 +8,7 @@ class App extends Component {
 		super()
 		this.state = {
 			auth: Auth.isUserAuthenticated(),
-
+			bings: 0,
 		}
 		this.handleChange = this.handleChange.bind(this)
 		this.handleSubmission = this.handleSubmission.bind(this)
@@ -109,6 +109,15 @@ class App extends Component {
 					<input type="text" name="registerPassword" value={this.state.registerPassword} onChange={(e)=>{this.handleChange(e)}}/>
 					<input type="submit" value="Sign Up"/>
 				</form>
+				<br/>
+				{this.state.auth ? (
+					<div>
+						<p>{this.state.bings} bings</p>
+						<button onClick={()=>{console.log('Bing!',this.state.bings);this.setState({bings: ++this.state.bings})}}>Bing!</button>
+					</div>
+					):(
+					null
+					)}
 			</div>
     );
   }
