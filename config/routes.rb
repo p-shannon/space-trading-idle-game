@@ -5,6 +5,7 @@ Rails.application.routes.draw do
 	get		 "/profile"	 	=> "users#profile"
 	delete	 "/game/init"	=> "game#initialize_data"
 	put 	 "/game/save" 	=> "game#save_data"
-	
-	resources :users
+	get		 "/game/load"	=> "game#load_data"
+
+	resources :users 
 end
