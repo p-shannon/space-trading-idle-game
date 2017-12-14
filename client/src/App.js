@@ -17,9 +17,9 @@ class App extends Component {
 		this.loadData = this.loadData.bind(this)
 	}
 
-	//componentDidUpdate(){
-	//	this.state.auth ? this.loadData() : null
-	//}
+	componentDidMount(){
+		this.state.auth ? this.loadData() : null
+	}
 
 	handleChange(event){
 		console.log('Tick!')
