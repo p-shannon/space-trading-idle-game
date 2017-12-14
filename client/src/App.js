@@ -13,6 +13,7 @@ class App extends Component {
 		this.handleChange = this.handleChange.bind(this)
 		this.handleSubmission = this.handleSubmission.bind(this)
 		this.logout = this.logout.bind(this)
+		this.saveData = this.saveData.bind(this)
 	}
 
 	handleChange(event){
@@ -92,6 +93,23 @@ class App extends Component {
 		})
 	}
 
+	saveData(){
+		let data = ()=>{return {bings: this.state.bings}}
+		console.log('Saving game data...', data())
+		fetch('/game/save',{
+			method: "put",
+			headers: {
+				'Content-Type':'application/json',
+				'Authorization': `Token ${Auth.getToken()}`,
+				token: Auth.getToken(),
+			},
+			body: JSON.stringify({data:data()})
+		})
+		.then(res => res.json())
+		.then(res => console.log(res))
+		//.catch(error => console.warn('ERROR',error))
+	}
+
   render() {
     return (
 			<div>
@@ -114,6 +132,7 @@ class App extends Component {
 					<div>
 						<p>{this.state.bings} bings</p>
 						<button onClick={()=>{console.log('Bing!',this.state.bings);this.setState({bings: ++this.state.bings})}}>Bing!</button>
+						<button onClick={()=>{this.saveData()}}>Save!</button>
 					</div>
 					):(
 					null

@@ -10,4 +10,13 @@ class GameController < ApiController
 		}
 	end
 
+	def save_data
+		user = User.find_by_auth_token!(request.headers[:token])
+		user.update(data: params[:data])
+		render json: {
+			status: "User's data reset!",
+			user: user
+		}
+	end
+
 end
