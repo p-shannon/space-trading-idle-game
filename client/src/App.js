@@ -8,11 +8,17 @@ class App extends Component {
 		super()
 		this.state = {
 			auth: Auth.isUserAuthenticated(),
-
+			data: null
 		}
 		this.handleChange = this.handleChange.bind(this)
 		this.handleSubmission = this.handleSubmission.bind(this)
 		this.logout = this.logout.bind(this)
+		this.saveData = this.saveData.bind(this)
+		this.loadData = this.loadData.bind(this)
+	}
+
+	componentDidMount(){
+		this.state.auth ? this.loadData() : null
 	}
 
 	handleChange(event){
@@ -69,6 +75,9 @@ class App extends Component {
 				console.warn('Token not recieved!')
 			}
 		})
+		.then(res => {
+			this.loadData()
+		})
 		.catch(error => console.warn('error',error))
 	}
 
@@ -92,6 +101,53 @@ class App extends Component {
 		})
 	}
 
+	saveData(){
+		let data = this.state.data
+		console.log('Saving game data...', data)
+		fetch('/game/save',{
+			method: "put",
+			headers: {
+				'Content-Type':'application/json',
+				'Authorization': `Token ${Auth.getToken()}`,
+				token: Auth.getToken(),
+			},
+			body: JSON.stringify({data:data})
+		})
+		.then(res => res.json())
+		.then(res => console.log(res))
+		.catch(error => console.error('ERROR',error))
+	}
+
+	loadData(){
+		console.log('loading game data...')
+		fetch('/game/load',{
+			headers:{
+				"Authorization":`Token ${Auth.getToken()}`,
+				token: Auth.getToken()
+				}
+			}
+		)
+		.then(res=>res.json())
+		.then(res=>{
+			console.log('res',res)
+			if (res.user.data){
+				console.log('YES!')
+				this.setState({
+					data: JSON.parse(res.user.data)
+				})
+			}
+			else{
+				console.warn('Why!?!?')
+				this.setState({
+					data: {
+						bings: Number(0)
+					}
+				})
+			}
+		})
+		.catch(error => console.error('ERROR',error))
+	}
+
   render() {
     return (
 			<div>
@@ -109,6 +165,23 @@ class App extends Component {
 					<input type="text" name="registerPassword" value={this.state.registerPassword} onChange={(e)=>{this.handleChange(e)}}/>
 					<input type="submit" value="Sign Up"/>
 				</form>
+				<br/>
+				{this.state.data ? (
+					<div>
+						<p>{this.state.data.bings} bings</p>
+						<button onClick={()=>{
+							console.log('Bing!',this.state.data.bings)
+							let data = Object.assign({},this.state.data)
+							data.bings++
+							this.setState({
+								data: data
+							})
+						}}>Bing!</button>
+						<button onClick={()=>{this.saveData()}}>Save!</button>
+					</div>
+					):(
+					null
+					)}
 			</div>
     );
   }
