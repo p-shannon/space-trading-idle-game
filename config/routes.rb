@@ -7,5 +7,6 @@ Rails.application.routes.draw do
 	put 	 "/game/save" 	=> "game#save_data"
 	get		 "/game/load"	=> "game#load_data"
 
-	resources :users 
+	resources :users
+	resources :regions 
 end
