@@ -1,4 +1,4 @@
 class Region < ApplicationRecord
 	has_one :user
-	validates :name
+	validates :name, presence: true
 end
