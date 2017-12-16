@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+	has_many :regions
 	validates_uniqueness_of :username
 	has_secure_password
 	has_secure_token :auth_token
