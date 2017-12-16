@@ -15,6 +15,9 @@ class App extends Component {
 		this.logout = this.logout.bind(this)
 		this.saveData = this.saveData.bind(this)
 		this.loadData = this.loadData.bind(this)
+		this.fetchRegions = this.fetchRegions.bind(this)
+		this.occupyRegion = this.occupyRegion.bind(this)
+		this.abandonRegion = this.abandonRegion.bind(this)
 	}
 
 	componentDidMount(){
@@ -97,6 +100,7 @@ class App extends Component {
 				auth: Auth.isUserAuthenticated(),
 				loginUsername: "",
 				loginPassword: "",
+				data: null,
 			})
 		})
 	}
@@ -133,7 +137,8 @@ class App extends Component {
 			if (res.user.data){
 				console.log('YES!')
 				this.setState({
-					data: JSON.parse(res.user.data)
+					data: JSON.parse(res.user.data),
+					activeRegions: res.user.regions
 				})
 			}
 			else{
@@ -146,6 +151,58 @@ class App extends Component {
 			}
 		})
 		.catch(error => console.error('ERROR',error))
+	}
+
+	fetchRegions(){
+		console.log('fetching regions...')
+		fetch('/regions')
+		.then(res=>res.json())
+		.then(res=>{
+			let vacants = res.regions.filter(region=>!region.user_id)
+			this.setState({
+				vacantRegions : vacants
+			})
+		})
+		.catch(error => console.error('ERROR',error))
+	}
+
+	occupyRegion(region_id){
+		this.saveData()
+		fetch('/game/occupy',{
+			method: "put",
+			headers: {
+				'Content-Type':'application/json',
+				'Authorization': `Token ${Auth.getToken()}`,
+				token: Auth.getToken()
+			},
+			body: JSON.stringify({id:region_id})
+		})
+		.then(res=>res.json())
+		.then(res=>{
+			this.loadData()
+			this.setState({
+				vacantRegions:null
+			})
+		})
+		.catch(error=>console.error('ERROR',error))
+	}
+
+	abandonRegion(region_id){
+		this.saveData()
+		fetch('/game/abandon',{
+			method: "put",
+			headers: {
+				'Content-Type':'application/json',
+				'Authorization': `Token ${Auth.getToken()}`,
+				token: Auth.getToken()
+			},
+			body: JSON.stringify({id:region_id})
+		})
+		.then(res=>res.json())
+		.then(res=>{
+			this.loadData()
+		})
+		.catch(error=>console.error('ERROR',error))
 	}
 
   render() {
@@ -178,6 +235,25 @@ class App extends Component {
 							})
 						}}>Bing!</button>
 						<button onClick={()=>{this.saveData()}}>Save!</button>
+						<div>
+						<p>Your regions:</p>
+						{this.state.activeRegions.map((region)=>{
+							return( 
+								<div>
+									<span>{region.name}</span>
+									<button onClick={()=>{this.abandonRegion(region.id)}}>Abandon</button>
+								</div>
+							)
+						})}
+						<button onClick={()=>{this.fetchRegions()}}>Show vacant regions</button>
+						{this.state.vacantRegions?(this.state.vacantRegions.map(region=>{
+							return(
+								<div>
+									<span>{region.id}:{region.name}</span>
+									<button onClick={()=>{this.occupyRegion(region.id)}}>Move in</button>
+								</div>
+						)})):(null)}
+						</div>
 					</div>
 					):(
 					null

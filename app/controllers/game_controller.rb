@@ -31,7 +31,8 @@ class GameController < ApiController
 			status: "Grabbed user's data!",
 			user: {
 				username: user.username,
-				data: user.data
+				data: user.data,
+				regions: user.regions
 			}
 		}
 	end
