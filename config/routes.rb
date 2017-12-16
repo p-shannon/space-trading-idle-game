@@ -6,6 +6,8 @@ Rails.application.routes.draw do
 	delete	 "/game/init"	=> "game#initialize_data"
 	put 	 "/game/save" 	=> "game#save_data"
 	get		 "/game/load"	=> "game#load_data"
+	put "/game/move_in" => "game#occupy_region"
+	put "/game/abandon" => "game#abandon_region"
 
 	resources :users
 	resources :regions 

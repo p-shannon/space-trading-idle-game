@@ -36,4 +36,28 @@ class GameController < ApiController
 		}
 	end
 
+	def occupy_region
+		user = User.find_by_auth_token!(request.headers[:token])
+		region = Region.find(params[:id])
+		unless region.user_id
+			region.update(user_id: user.id)
+			render json: {
+				message: "Moved into region successfully!",
+				region: region
+			}
+		else
+			render json: {
+				message: "Error: Cannot move into occupied regions"
+			}
+		end
+	end
+
+	def abandon_region
+		region = Region.find(params[:id])
+		region.update(user_id: nil)
+		render json: {
+			message: "Region abandoned successfully!"
+		}
+	end
+
 end
