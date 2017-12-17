@@ -9,9 +9,16 @@ class RegionsController < ApiController
 	end
 
 	def index
+		regions = Region.all
+		regions = regions.map{|region|
+			{
+				region:region,
+				resources:region.resources
+			}
+		}
 		render json: {
 			message: "Regions fetched successfully!",
-			regions: Region.all
+			regions: regions
 		}
 	end
 
