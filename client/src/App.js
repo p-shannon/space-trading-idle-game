@@ -158,7 +158,8 @@ class App extends Component {
 		fetch('/regions')
 		.then(res=>res.json())
 		.then(res=>{
-			let vacants = res.regions.filter(region=>!region.user_id)
+			let vacants = res.regions.filter(elem=>!elem.region.user_id)
+			console.log('vacants',vacants)
 			this.setState({
 				vacantRegions : vacants
 			})
@@ -225,6 +226,23 @@ class App extends Component {
 				<br/>
 				{this.state.data ? (
 					<div>
+					{this.state.activeRegions[0].resources.map((elem)=>{
+						return(<div>
+						<p>{this.state.data[elem.id]||0} {elem.name}</p>
+						<button onClick={()=>{
+							console.log('Bing!',this.state.data)
+							let data = Object.assign({},this.state.data)
+							if (!data[elem.id]) {
+								data[elem.id] = 0
+							}
+							data[elem.id]++
+							this.setState({
+								data: data
+							})
+						}}>Collect</button>
+						</div>)
+					})}
+
 						<p>{this.state.data.bings} bings</p>
 						<button onClick={()=>{
 							console.log('Bing!',this.state.data.bings)
@@ -237,20 +255,20 @@ class App extends Component {
 						<button onClick={()=>{this.saveData()}}>Save!</button>
 						<div>
 						<p>Your regions:</p>
-						{this.state.activeRegions.map((region)=>{
+						{this.state.activeRegions.map((elem)=>{
 							return( 
 								<div>
-									<span>{region.name}</span>
-									<button onClick={()=>{this.abandonRegion(region.id)}}>Abandon</button>
+									<span>{elem.region.name}</span>
+									<button onClick={()=>{this.abandonRegion(elem.region.id)}}>Abandon</button>
 								</div>
 							)
 						})}
 						<button onClick={()=>{this.fetchRegions()}}>Show vacant regions</button>
-						{this.state.vacantRegions?(this.state.vacantRegions.map(region=>{
+						{this.state.vacantRegions?(this.state.vacantRegions.map(elem=>{
 							return(
 								<div>
-									<span>{region.id}:{region.name}</span>
-									<button onClick={()=>{this.occupyRegion(region.id)}}>Move in</button>
+									<span>{elem.region.id}:{elem.region.name}</span>
+									<button onClick={()=>{this.occupyRegion(elem.region.id)}}>Move in</button>
 								</div>
 						)})):(null)}
 						</div>

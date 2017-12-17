@@ -3,7 +3,7 @@ class GameController < ApiController
 
 	def initialize_data
 		user = User.find_by_auth_token!(request.headers[:token])
-		user.update(data: nil)
+		user.update(data: nil) #Also needs to abandon all territories
 		render json: {
 			status: "User's data reset!",
 			user: {
