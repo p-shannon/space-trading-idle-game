@@ -27,12 +27,19 @@ class GameController < ApiController
 
 	def load_data
 		user = User.find_by_auth_token!(request.headers[:token])
+		regions = user.regions
+		regions = regions.map{|region|
+			{
+				region:region,
+				resources:region.resources
+			}
+		}
 		render json: {
 			status: "Grabbed user's data!",
 			user: {
 				username: user.username,
 				data: user.data,
-				regions: user.regions
+				regions: regions
 			}
 		}
 	end
