@@ -8,7 +8,9 @@ class App extends Component {
 		super()
 		this.state = {
 			auth: Auth.isUserAuthenticated(),
-			data: null
+			data: null,
+			activeRegions: [],
+			activeRegionData: null
 		}
 		this.handleChange = this.handleChange.bind(this)
 		this.handleSubmission = this.handleSubmission.bind(this)
@@ -104,7 +106,22 @@ class App extends Component {
 			})
 		})
 	}
-
+	saveRegionData(id){
+		let data = this.state.activeRegionData
+		console.log('Saving region data...', data)
+		fetch('/game/regionsave',{
+			method: "put",
+			headers: {
+				'Content-Type':'application/json',
+				'Authorization': `Token ${Auth.getToken()}`,
+				token: Auth.getToken(),
+			},
+			body: JSON.stringify({id:id,data:data})
+		})
+		.then(res => res.json())
+		.then(res => console.log(res))
+		.catch(error => console.error('ERROR',error))
+	}
 	saveData(){
 		let data = this.state.data
 		console.log('Saving game data...', data)
@@ -137,9 +154,20 @@ class App extends Component {
 			if (res.user.data){
 				console.log('YES!')
 				this.setState({
-					data: JSON.parse(res.user.data),
-					activeRegions: res.user.regions
+					data: JSON.parse(res.user.data)
 				})
+				if (res.user.regions.length){
+					this.setState({
+						activeRegions: res.user.regions,
+						activeRegionData: JSON.parse(res.user.regions[0].region.data)
+					})
+				}
+				else{
+					this.setState({
+						activeRegions: [],
+						activeRegionData: null
+					})
+				}
 			}
 			else{
 				console.warn('Why!?!?')
@@ -224,24 +252,28 @@ class App extends Component {
 					<input type="submit" value="Sign Up"/>
 				</form>
 				<br/>
-				{this.state.data ? (
+				{this.state.activeRegions[0] ? (
 					<div>
 					{this.state.activeRegions[0].resources.map((elem)=>{
 						return(<div>
 						<p>{this.state.data[elem.id]||0} {elem.name}</p>
 						<button onClick={()=>{
 							console.log('Bing!',this.state.data)
+							console.log('Zing!',this.state.activeRegionData)
 							let data = Object.assign({},this.state.data)
 							if (!data[elem.id]) {
 								data[elem.id] = 0
 							}
 							data[elem.id]++
+							let regionData = Object.assign({},this.state.activeRegionData)
+							regionData[elem.id]--
 							this.setState({
-								data: data
+								data: data,
+								activeRegionData: regionData
 							})
 						}}>Collect</button>
 						</div>)
-					})}
+					})} 
 
 						<p>{this.state.data.bings} bings</p>
 						<button onClick={()=>{
@@ -252,7 +284,7 @@ class App extends Component {
 								data: data
 							})
 						}}>Bing!</button>
-						<button onClick={()=>{this.saveData()}}>Save!</button>
+						<button onClick={()=>{this.saveData(),this.saveRegionData(8)}}>Save!</button>
 						<div>
 						<p>Your regions:</p>
 						{this.state.activeRegions.map((elem)=>{
