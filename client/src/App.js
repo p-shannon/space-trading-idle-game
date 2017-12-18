@@ -235,7 +235,7 @@ class App extends Component {
 		.catch(error=>console.error('ERROR',error))
 	}
 
-	collectResource(id){
+	collectResource(id,amount){
 		if (this.state.activeRegionData[id]<=0){
 			console.log('region void of resource')
 			return false
@@ -246,9 +246,9 @@ class App extends Component {
 		if (!data[id]) {
 			data[id] = 0
 		}
-		data[id]++
+		data[id]+=amount
 		let regionData = Object.assign({},this.state.activeRegionData)
-		regionData[id]--
+		regionData[id]-=amount
 		this.setState({
 			data: data,
 			activeRegionData: regionData
@@ -279,7 +279,7 @@ class App extends Component {
 						return(<div>
 						<p>{this.state.data[elem.id]||0} {elem.name}</p>
 						<button onClick={()=>{
-							this.collectResource(elem.id)
+							this.collectResource(elem.id,1)
 						}}>Collect</button>
 						</div>)
 					})} 
