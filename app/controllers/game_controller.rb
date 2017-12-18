@@ -3,7 +3,7 @@ class GameController < ApiController
 
 	def initialize_data
 		user = User.find_by_auth_token!(request.headers[:token])
-		user.update(data: nil)
+		user.update(data: nil) #Also needs to abandon all territories
 		render json: {
 			status: "User's data reset!",
 			user: {
@@ -25,14 +25,37 @@ class GameController < ApiController
 		}
 	end
 
+	def save_region
+		user = User.find_by_auth_token!(request.headers[:token])
+		region = Region.find(params[:id])
+		if user.id == region.user_id
+			region.update(data: params[:data].to_json)
+			render json: {
+				status: "Region data saved!",
+				region: region
+			}
+		else
+			render json: {
+				status: "Error: Cannot save region that doesn't belong to you."
+			}
+		end
+	end
+
 	def load_data
 		user = User.find_by_auth_token!(request.headers[:token])
+		regions = user.regions
+		regions = regions.map{|region|
+			{
+				region:region,
+				resources:region.resources
+			}
+		}
 		render json: {
 			status: "Grabbed user's data!",
 			user: {
 				username: user.username,
 				data: user.data,
-				regions: user.regions
+				regions: regions
 			}
 		}
 	end

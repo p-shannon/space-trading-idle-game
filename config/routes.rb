@@ -4,6 +4,7 @@ Rails.application.routes.draw do
 	delete   "/logout"	 	=> "sessions#destroy"
 	get		 "/profile"	 	=> "users#profile"
 	delete	 "/game/init"	=> "game#initialize_data"
+	put "/game/regionsave" => "game#save_region"
 	put 	 "/game/save" 	=> "game#save_data"
 	get		 "/game/load"	=> "game#load_data"
 	put "/game/occupy" => "game#occupy_region"
