@@ -20,6 +20,7 @@ class App extends Component {
 		this.fetchRegions = this.fetchRegions.bind(this)
 		this.occupyRegion = this.occupyRegion.bind(this)
 		this.abandonRegion = this.abandonRegion.bind(this)
+		this.collectResource = this.collectResource.bind(this)
 	}
 
 	componentDidMount(){
@@ -234,6 +235,26 @@ class App extends Component {
 		.catch(error=>console.error('ERROR',error))
 	}
 
+	collectResource(id){
+		if (this.state.activeRegionData[id]<=0){
+			console.log('region void of resource')
+			return false
+		}
+		console.log('Bing!',this.state.data)
+		console.log('Zing!',this.state.activeRegionData)
+		let data = Object.assign({},this.state.data)
+		if (!data[id]) {
+			data[id] = 0
+		}
+		data[id]++
+		let regionData = Object.assign({},this.state.activeRegionData)
+		regionData[id]--
+		this.setState({
+			data: data,
+			activeRegionData: regionData
+		})
+	}
+
   render() {
     return (
 			<div>
@@ -258,23 +279,7 @@ class App extends Component {
 						return(<div>
 						<p>{this.state.data[elem.id]||0} {elem.name}</p>
 						<button onClick={()=>{
-							if (this.state.activeRegionData[elem.id]<=0){
-								console.log('region void of resource')
-								return false
-							}
-							console.log('Bing!',this.state.data)
-							console.log('Zing!',this.state.activeRegionData)
-							let data = Object.assign({},this.state.data)
-							if (!data[elem.id]) {
-								data[elem.id] = 0
-							}
-							data[elem.id]++
-							let regionData = Object.assign({},this.state.activeRegionData)
-							regionData[elem.id]--
-							this.setState({
-								data: data,
-								activeRegionData: regionData
-							})
+							this.collectResource(elem.id)
 						}}>Collect</button>
 						</div>)
 					})} 
