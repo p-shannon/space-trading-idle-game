@@ -21,10 +21,13 @@ class App extends Component {
 		this.occupyRegion = this.occupyRegion.bind(this)
 		this.abandonRegion = this.abandonRegion.bind(this)
 		this.collectResource = this.collectResource.bind(this)
+		this.autoCollect = this.autoCollect.bind(this)
+		this.incrementIncome = this.incrementIncome.bind(this)
 	}
 
 	componentDidMount(){
 		this.state.auth ? this.loadData() : null
+		this.autoCollect()
 	}
 
 	handleChange(event){
@@ -240,6 +243,9 @@ class App extends Component {
 			console.log('region void of resource')
 			return false
 		}
+		else if(this.state.activeRegionData[id]<amount){
+			amount = this.state.activeRegionData[id]
+		}
 		console.log('Bing!',this.state.data)
 		console.log('Zing!',this.state.activeRegionData)
 		let data = Object.assign({},this.state.data)
@@ -253,6 +259,37 @@ class App extends Component {
 			data: data,
 			activeRegionData: regionData
 		})
+	}
+
+	incrementIncome(id,amount){
+		if(!this.state.data.income){
+			let temp = Object.assign({},this.state.data)
+			temp.income = {}
+			temp.income[id] = amount
+			this.setState({
+				data: temp
+			})
+		}
+		else{
+			let temp = Object.assign({},this.state.data)
+			if (!temp.income[id]){
+				temp.income[id] = 0
+			}
+			temp.income[id] += amount
+			this.setState({
+				data: temp
+			})
+		}
+	}
+
+	autoCollect(){
+		setInterval(()=>{
+			for (var resource in this.state.data.income) {
+    			if (this.state.data.income.hasOwnProperty(resource)) {
+        			this.collectResource(resource,this.state.data.income[resource])
+    			}
+			}
+		},1000)
 	}
 
   render() {
@@ -277,10 +314,14 @@ class App extends Component {
 					<div>
 					{this.state.activeRegions[0].resources.map((elem)=>{
 						return(<div>
-						<p>{this.state.data[elem.id]||0} {elem.name}</p>
+						<span>{this.state.data[elem.id]||0} {elem.name}</span>
 						<button onClick={()=>{
 							this.collectResource(elem.id,1)
 						}}>Collect</button>
+						<button onClick={()=>{
+							console.log('Auto Active!!!1!1!!')
+							this.incrementIncome(elem.id,1)
+						}}>Auto</button>
 						</div>)
 					})} 
 
