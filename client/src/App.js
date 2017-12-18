@@ -258,6 +258,10 @@ class App extends Component {
 						return(<div>
 						<p>{this.state.data[elem.id]||0} {elem.name}</p>
 						<button onClick={()=>{
+							if (this.state.activeRegionData[elem.id]<=0){
+								console.log('region void of resource')
+								return false
+							}
 							console.log('Bing!',this.state.data)
 							console.log('Zing!',this.state.activeRegionData)
 							let data = Object.assign({},this.state.data)
