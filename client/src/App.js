@@ -8,21 +8,26 @@ class App extends Component {
 		super()
 		this.state = {
 			auth: Auth.isUserAuthenticated(),
-			data: null,
+			data: {},
 			activeRegions: [],
-			activeRegionData: null
+			activeRegionData: null,
+			didStateUpdate: false,
+
 		}
 		this.handleChange = this.handleChange.bind(this)
 		this.handleSubmission = this.handleSubmission.bind(this)
 		this.logout = this.logout.bind(this)
 		this.saveData = this.saveData.bind(this)
 		this.loadData = this.loadData.bind(this)
+		this.fetchResourceData = this.fetchResourceData.bind(this)
 		this.fetchRegions = this.fetchRegions.bind(this)
 		this.occupyRegion = this.occupyRegion.bind(this)
 		this.abandonRegion = this.abandonRegion.bind(this)
 		this.collectResource = this.collectResource.bind(this)
 		this.autoCollect = this.autoCollect.bind(this)
 		this.incrementIncome = this.incrementIncome.bind(this)
+		this.setUpgrades = this.setUpgrades.bind(this)
+        this.showUpgrades = this.showUpgrades.bind(this)
 	}
 
 	componentDidMount(){
@@ -145,6 +150,7 @@ class App extends Component {
 
 	loadData(){
 		console.log('loading game data...')
+		this.fetchResourceData()
 		fetch('/game/load',{
 			headers:{
 				"Authorization":`Token ${Auth.getToken()}`,
@@ -157,6 +163,7 @@ class App extends Component {
 			console.log('res',res)
 			if (res.user.data){
 				console.log('YES!')
+
 				this.setState({
 					data: JSON.parse(res.user.data)
 				})
@@ -184,7 +191,16 @@ class App extends Component {
 		})
 		.catch(error => console.error('ERROR',error))
 	}
-
+	fetchResourceData(){
+		console.log('fetching resources...')
+		fetch('/resources')
+		.then(res=>res.json())
+		.then(res=>{
+			this.setState({
+				resources: res.resources
+			})
+		})
+	}
 	fetchRegions(){
 		console.log('fetching regions...')
 		fetch('/regions')
@@ -239,6 +255,7 @@ class App extends Component {
 	}
 
 	collectResource(id,amount){
+        console.log('collecting resource:',id,'Quantity:',amount)
 		if (this.state.activeRegionData[id]<=0){
 			console.log('region void of resource')
 			return false
@@ -250,6 +267,7 @@ class App extends Component {
 		console.log('Zing!',this.state.activeRegionData)
 		let data = Object.assign({},this.state.data)
 		if (!data[id]) {
+			data = this.setUpgrades(id)
 			data[id] = 0
 		}
 		data[id]+=amount
@@ -259,43 +277,104 @@ class App extends Component {
 			data: data,
 			activeRegionData: regionData
 		})
+        return data
 	}
 
-	incrementIncome(id,amount){
-		if(!this.state.data.income){
+	setUpgrades(id){
+		console.log('setting next upgrade')
+		let data = Object.assign({},this.state.data)
+		console.log(this.state.data)
+		if(!this.state.data.nextUpgrade){
+			data.nextUpgrade = {}
+		}
+		data.nextUpgrade[id] = {}
+		let resource = this.state.activeRegions[Math.floor(Math.random() * this.state.activeRegions.length)].resources[Math.floor(Math.random() * 3)].id
+		data.nextUpgrade[id][resource]=[15,.5]
+		console.log('temp',data)
+		this.setState({
+			data: data,
+		})
+		return data
+	}
+
+	incrementIncome(id,expense_id){
+        console.log("iI!!")
+		if(this.state.data.nextUpgrade){
 			let temp = Object.assign({},this.state.data)
-			temp.income = {}
-			temp.income[id] = amount
+            console.log(temp[expense_id],':inventory; ',temp.nextUpgrade[id][expense_id][0],"expense")
+			if(temp[expense_id] < temp.nextUpgrade[id][expense_id][0] || !temp[expense_id]){
+				console.log('not enough.')
+				return false
+			}
+            console.log('decrement...')
+			temp = this.collectResource(expense_id,temp.nextUpgrade[id][expense_id][0] * -1)
+			if(!this.state.data.income){
+				temp.income = {}
+			}
+            if(!temp.income[id]){
+                temp.income[id] = temp.nextUpgrade[id][expense_id][1]
+            }
+            else{
+                temp.income[id] += temp.nextUpgrade[id][expense_id][1]
+            }
 			this.setState({
 				data: temp
 			})
 		}
 		else{
-			let temp = Object.assign({},this.state.data)
-			if (!temp.income[id]){
-				temp.income[id] = 0
-			}
-			temp.income[id] += amount
-			this.setState({
-				data: temp
-			})
+			console.log('nah')
+			return false
 		}
 	}
 
 	autoCollect(){
-		setInterval(()=>{
-			for (var resource in this.state.data.income) {
-    			if (this.state.data.income.hasOwnProperty(resource)) {
-        			this.collectResource(resource,this.state.data.income[resource])
-    			}
-			}
-		},1000)
+		if(!this.state.data || !this.state.data.income){
+			setTimeout(()=>{this.autoCollect()},1000)
+		}
+		else{
+			setInterval(()=>{
+				for (var resource in this.state.data.income) {
+	    			if (this.state.data.income.hasOwnProperty(resource)) {
+	        			this.collectResource(resource,this.state.data.income[resource])
+	    			}
+				}
+			},1000)
+		}
 	}
 
-  render() {
+	showUpgrades(resource){
+		if (this.state.data.nextUpgrade){
+			if(this.state.data.nextUpgrade[resource]){
+                console.log("boom",this.state.resources[Number(Object.keys(this.state.data.nextUpgrade[resource])[0]) - 1].name)
+				return(
+					<div>
+						<span>>{this.state.data.nextUpgrade[resource][Object.keys(this.state.data.nextUpgrade[resource])[0]][0]} {this.state.resources[Number(Object.keys(this.state.data.nextUpgrade[resource])[0]) - 1].name} for an added income of {this.state.data.nextUpgrade[resource][Object.keys(this.state.data.nextUpgrade[resource])[0]][1]} per second</span>
+                        <button onClick={()=>{this.incrementIncome(resource,Number(Object.keys(this.state.data.nextUpgrade[resource])[0]))}}>upgrade</button>
+					</div>
+				)
+			}
+		}
+	}
+
+	
+
+  	render() {
+  	console.log(this.state, '<----------- render')
     return (
 			<div>
-			{this.state.auth ? (<p onClick={()=>{this.logout()}}>AUTH ACTIVE</p>):null}
+			{this.state.auth ? (
+				<div>
+					<p onClick={()=>{this.logout()}}>AUTH ACTIVE</p>
+					<button onClick={()=>{this.fetchRegions()}}>Show vacant regions</button>
+						{this.state.vacantRegions?(this.state.vacantRegions.map(elem=>{
+							return(
+								<div>
+									<span>{elem.region.id}:{elem.region.name}</span>
+									<button onClick={()=>{this.occupyRegion(elem.region.id)}}>Move in</button>
+								</div>
+						)})):(null)}
+				</div>
+				):null}
 				<form onSubmit={(e)=>{this.handleSubmission(e,'/login','POST')}}>
 					<label>Login</label>
 					<input type="text" name="loginUsername" value={this.state.loginUsername} onChange={(e)=>{this.handleChange(e)}}/>
@@ -318,10 +397,9 @@ class App extends Component {
 						<button onClick={()=>{
 							this.collectResource(elem.id,1)
 						}}>Collect</button>
-						<button onClick={()=>{
-							console.log('Auto Active!!!1!1!!')
-							this.incrementIncome(elem.id,1)
-						}}>Auto</button>
+						<p>Upgrades:</p>
+						{this.showUpgrades(elem.id)}
+                        <hr/>
 						</div>)
 					})} 
 
@@ -336,6 +414,7 @@ class App extends Component {
 						}}>Bing!</button>
 						<button onClick={()=>{this.saveData(),this.saveRegionData(8)}}>Save!</button>
 						<div>
+
 						<p>Your regions:</p>
 						{this.state.activeRegions.map((elem)=>{
 							return( 
