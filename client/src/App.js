@@ -10,6 +10,7 @@ class App extends Component {
 			auth: Auth.isUserAuthenticated(),
 			data: {},
 			activeRegions: [],
+            selectedRegion: 0,
 			activeRegionData: null,
 			didStateUpdate: false,
 
@@ -29,6 +30,7 @@ class App extends Component {
 		this.setUpgrades = this.setUpgrades.bind(this)
         this.showUpgrades = this.showUpgrades.bind(this)
         this.expendResource = this.expendResource.bind(this)
+        this.switchRegion = this.switchRegion.bind(this)
 	}
 
 	componentDidMount(){
@@ -148,7 +150,26 @@ class App extends Component {
 		.then(res => console.log(res))
 		.catch(error => console.error('ERROR',error))
 	}
-
+    switchRegion(down){
+        this.saveRegionData(this.state.activeRegions[this.state.selectedRegion].id)
+        let selection = this.state.selectedRegion
+        if(selection===this.state.activeRegions.length-1 && !down){    
+            selection = 0
+        }
+        else if(!down){
+            selection++
+        }
+        else if(selection===0){
+            selection = this.state.activeRegions.length-1
+        }
+        else{
+            selection--
+        }
+        this.setState({
+            selectedRegion: selection,
+            activeRegionData: JSON.parse(this.state.activeRegions[selection].region.data)
+        })
+    }
 	loadData(){
 		console.log('loading game data...')
 		this.fetchResourceData()
@@ -257,7 +278,8 @@ class App extends Component {
 
 	collectResource(id,amount){
         console.log('collecting resource:',id,'Quantity:',amount)
-		if (this.state.activeRegionData[id]<=0){
+        //We'll be back
+		if (this.state.activeRegionData[id]<=0||!this.state.activeRegionData[id]){
 			console.log('region void of resource')
 			return false
 		}
@@ -451,15 +473,18 @@ class App extends Component {
 					<input type="submit" value="Sign Up"/>
 				</form>
 				<br/>
-				{this.state.activeRegions[0] ? (
+				{this.state.activeRegions[this.state.selectedRegion] ? (
 					<div>
-					{this.state.activeRegions[0].resources.map((elem)=>{
+                    <p>{this.state.activeRegions[this.state.selectedRegion].region.name}</p>
+                        <button onClick={()=>{this.switchRegion()}}>Next Region</button>||<button onClick={()=>{this.switchRegion('down')}}>Prev Region</button>
+                    
+					{this.state.activeRegions[this.state.selectedRegion].resources.map((elem)=>{
 						return(<div>
 						<span>{this.state.data[elem.id]||0} {elem.name}</span>
 						<button onClick={()=>{
 							this.collectResource(elem.id,1)
 						}}>Collect</button>
-                        <span>{this.state.data.income?(this.state.data.income[elem.id]):(0)}/sec</span>
+                        <span>{this.state.data.income?(this.state.data.income[elem.id]||0):(0)}/sec</span>
 						<p>Upgrades:</p>
 						{this.showUpgrades(elem.id)}
                         <hr/>
@@ -475,7 +500,7 @@ class App extends Component {
 								data: data
 							})
 						}}>Bing!</button>
-						<button onClick={()=>{this.saveData(),this.saveRegionData(8)}}>Save!</button>
+						<button onClick={()=>{this.saveData(),this.saveRegionData(this.state.selectedRegion)}}>Save!</button>
 						<div>
 
 						<p>Your regions:</p>

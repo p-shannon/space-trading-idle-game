@@ -9,7 +9,7 @@ class Region < ApplicationRecord
 		end
 		data = {}
 		self.resources.each do |resource|
-			data[resource.id] = 500
+			data[resource.id] = rand(50000..250000)
 		end
 		self.update(data: data.to_json)
 	end
