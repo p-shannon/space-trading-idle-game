@@ -28,6 +28,7 @@ class App extends Component {
 		this.incrementIncome = this.incrementIncome.bind(this)
 		this.setUpgrades = this.setUpgrades.bind(this)
         this.showUpgrades = this.showUpgrades.bind(this)
+        this.expendResource = this.expendResource.bind(this)
 	}
 
 	componentDidMount(){
@@ -271,8 +272,10 @@ class App extends Component {
 			data[id] = 0
 		}
 		data[id]+=amount
+        data[id] = Math.round(10*data[id])/10
 		let regionData = Object.assign({},this.state.activeRegionData)
 		regionData[id]-=amount
+        regionData[id] = Math.round(10*regionData[id])/10
 		this.setState({
 			data: data,
 			activeRegionData: regionData
@@ -280,7 +283,31 @@ class App extends Component {
         return data
 	}
 
+    expendResource(id,amount){
+        console.log('expending...')
+        let data = Object.assign({},this.state.data)
+        if (data[id] < amount){
+            return data
+        }
+        data[id]-=amount
+        data[id] = Math.round(10*data[id])/10
+        this.setState({
+            data: data
+        })
+        return data
+    }
+
 	setUpgrades(id){
+        //Shameless copy paste from mdn's random article.
+        function getRandomRange(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
+        }
+        //This too
+        function getRandomArbitrary(min, max) {
+            return Math.random() * (max - min) + min;
+        }
 		console.log('setting next upgrade')
 		let data = Object.assign({},this.state.data)
 		console.log(this.state.data)
@@ -288,8 +315,29 @@ class App extends Component {
 			data.nextUpgrade = {}
 		}
 		data.nextUpgrade[id] = {}
-		let resource = this.state.activeRegions[Math.floor(Math.random() * this.state.activeRegions.length)].resources[Math.floor(Math.random() * 3)].id
-		data.nextUpgrade[id][resource]=[15,.5]
+        let amount = 0
+        let increase = 0
+        for(let i = 0; i<3; i++){
+            if(this.state.data.income){
+                if(!this.state.data.income[id]){
+                    console.log('buzz')
+                    amount = Math.round(10*getRandomArbitrary(6,12))/10
+                    increase = Math.round(10*getRandomArbitrary(0.2,0.7))/10
+                }
+                else{
+                    console.log('boop')
+                    amount = Math.round(10*getRandomArbitrary(8*(this.state.data.income[id]/3),16*(this.state.data.income[id]/3)))/10
+                    increase = Math.round(10*getRandomArbitrary(0.4*(this.state.data.income[id]/1.5),0.9*(this.state.data.income[id]/1.5)))/10
+                }
+            }
+            else{
+                console.log('buzz')
+                amount = Math.round(10*getRandomArbitrary(6,12))/10
+                increase = Math.round(10*getRandomArbitrary(0.2,0.7))/10
+            }
+            let resource = this.state.activeRegions[getRandomRange(0,this.state.activeRegions.length - 1)].resources[getRandomRange(0,2)].id
+            data.nextUpgrade[id][resource]=[amount,increase]
+        }
 		console.log('temp',data)
 		this.setState({
 			data: data,
@@ -307,7 +355,8 @@ class App extends Component {
 				return false
 			}
             console.log('decrement...')
-			temp = this.collectResource(expense_id,temp.nextUpgrade[id][expense_id][0] * -1)
+            console.log('temp',temp)
+			temp = this.expendResource(expense_id,temp.nextUpgrade[id][expense_id][0])
 			if(!this.state.data.income){
 				temp.income = {}
 			}
@@ -317,6 +366,7 @@ class App extends Component {
             else{
                 temp.income[id] += temp.nextUpgrade[id][expense_id][1]
             }
+            this.setUpgrades(id)
 			this.setState({
 				data: temp
 			})
@@ -346,11 +396,22 @@ class App extends Component {
 		if (this.state.data.nextUpgrade){
 			if(this.state.data.nextUpgrade[resource]){
                 console.log("boom",this.state.resources[Number(Object.keys(this.state.data.nextUpgrade[resource])[0]) - 1].name)
+                let array = Object.entries(this.state.data.nextUpgrade[resource])
+                console.log(array)
 				return(
-					<div>
-						<span>>{this.state.data.nextUpgrade[resource][Object.keys(this.state.data.nextUpgrade[resource])[0]][0]} {this.state.resources[Number(Object.keys(this.state.data.nextUpgrade[resource])[0]) - 1].name} for an added income of {this.state.data.nextUpgrade[resource][Object.keys(this.state.data.nextUpgrade[resource])[0]][1]} per second</span>
-                        <button onClick={()=>{this.incrementIncome(resource,Number(Object.keys(this.state.data.nextUpgrade[resource])[0]))}}>upgrade</button>
-					</div>
+                    <div>
+                    {array.map((upgrade)=>{
+                        console.log(upgrade)
+                        return(
+                            <div>
+    						<span>>{upgrade[1][0]} {this.state.resources[Number(upgrade[0]) - 1].name} for an added income of {upgrade[1][1]} per second</span>
+                            <button onClick={()=>{this.incrementIncome(resource,Number(upgrade[0]))}}>upgrade</button>
+                            </div>
+                            )
+                        
+                    })}
+</div>
+    				
 				)
 			}
 		}
