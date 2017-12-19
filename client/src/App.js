@@ -317,6 +317,7 @@ class App extends Component {
 		data.nextUpgrade[id] = {}
         let amount = 0
         let increase = 0
+        let resource = 0
         for(let i = 0; i<3; i++){
             if(this.state.data.income){
                 if(!this.state.data.income[id]){
@@ -326,16 +327,16 @@ class App extends Component {
                 }
                 else{
                     console.log('boop')
-                    amount = Math.round(10*getRandomArbitrary(8*(this.state.data.income[id]/3),16*(this.state.data.income[id]/3)))/10
-                    increase = Math.round(10*getRandomArbitrary(0.4*(this.state.data.income[id]/1.5),0.9*(this.state.data.income[id]/1.5)))/10
+                    amount = Math.round(10*getRandomArbitrary(8*(this.state.data.income[id]*1.2),16*(this.state.data.income[id]*1.3)))/10
+                    increase = Math.round(10*getRandomArbitrary(0.4*(this.state.data.income[id]/1.5),0.9*(this.state.data.income[id]/1.9)))/10
                 }
             }
             else{
-                console.log('buzz')
+                console.log('buozz')
                 amount = Math.round(10*getRandomArbitrary(6,12))/10
                 increase = Math.round(10*getRandomArbitrary(0.2,0.7))/10
             }
-            let resource = this.state.activeRegions[getRandomRange(0,this.state.activeRegions.length - 1)].resources[getRandomRange(0,2)].id
+            resource = this.state.activeRegions[getRandomRange(0,this.state.activeRegions.length - 1)].resources[getRandomRange(0,2)].id
             data.nextUpgrade[id][resource]=[amount,increase]
         }
 		console.log('temp',data)
@@ -458,6 +459,7 @@ class App extends Component {
 						<button onClick={()=>{
 							this.collectResource(elem.id,1)
 						}}>Collect</button>
+                        <span>{this.state.data.income?(this.state.data.income[elem.id]):(0)}/sec</span>
 						<p>Upgrades:</p>
 						{this.showUpgrades(elem.id)}
                         <hr/>
