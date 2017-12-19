@@ -151,7 +151,8 @@ class App extends Component {
 		.catch(error => console.error('ERROR',error))
 	}
     switchRegion(down){
-        this.saveRegionData(this.state.activeRegions[this.state.selectedRegion].id)
+        this.saveData()
+        this.saveRegionData(this.state.activeRegions[this.state.selectedRegion].region.id)
         let selection = this.state.selectedRegion
         if(selection===this.state.activeRegions.length-1 && !down){    
             selection = 0
@@ -475,6 +476,15 @@ class App extends Component {
 				<br/>
 				{this.state.activeRegions[this.state.selectedRegion] ? (
 					<div>
+                    {Object.entries(this.state.data).map((elem)=>{
+                        console.log("elem",elem)
+                        if (elem[0]==="income"||elem[0]==="nextUpgrade"||elem[0]==="Bings"||!this.state.resources[Number(elem[0]) - 1]){
+                            return null
+                        }
+                        return(
+                            <span>[ {this.state.resources[Number(elem[0]) - 1].name}, {elem[1]} ]</span>
+                            )
+                    })}
                     <p>{this.state.activeRegions[this.state.selectedRegion].region.name}</p>
                         <button onClick={()=>{this.switchRegion()}}>Next Region</button>||<button onClick={()=>{this.switchRegion('down')}}>Prev Region</button>
                     

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171217180432) do
+ActiveRecord::Schema.define(version: 20171219204921) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -27,6 +27,7 @@ ActiveRecord::Schema.define(version: 20171217180432) do
   create_table "regions_resources", id: false, force: :cascade do |t|
     t.bigint "region_id"
     t.bigint "resource_id"
+    t.index ["region_id", "resource_id"], name: "index_regions_resources_on_region_id_and_resource_id", unique: true
     t.index ["region_id"], name: "index_regions_resources_on_region_id"
     t.index ["resource_id"], name: "index_regions_resources_on_resource_id"
   end
