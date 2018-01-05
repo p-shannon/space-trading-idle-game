@@ -319,7 +319,18 @@ class App extends Component {
         })
         return data
     }
-
+    setRegionPrices(){
+        //Shameless copy paste from mdn's random article.
+        function getRandomRange(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
+        }
+        //This too
+        function getRandomArbitrary(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+    }
 	setUpgrades(id){
         //Shameless copy paste from mdn's random article.
         function getRandomRange(min, max) {
@@ -447,6 +458,7 @@ class App extends Component {
   	console.log(this.state, '<----------- render')
     return (
 			<div>
+            <marquee>See?<marquee>LITERALLY 9,000,000 HOURS OF CSS!11!!!!!</marquee>See?</marquee>
 			{this.state.auth ? (
 				<div>
 					<p onClick={()=>{this.logout()}}>AUTH ACTIVE</p>
